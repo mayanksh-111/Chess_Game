@@ -39,7 +39,7 @@ void ChessGame::startGame() {
 }
 
 void ChessGame::playTurn() {
-    // 🔁 If CPU is enabled and it's CPU's turn, let Stockfish move
+    // If CPU is enabled and it's CPU's turn, let Stockfish move
     if (isCPUEnabled && currentPlayer == cpuColor) {
         std::cout << "CPU is thinking using Stockfish...\n";
         std::string fen = board.getFEN(currentPlayer);
@@ -63,11 +63,11 @@ void ChessGame::playTurn() {
             std::cout << "Check!\n";
         }
 
-        switchPlayer();  // 🔁 switch after CPU moves
+        switchPlayer();  //switch after CPU moves
         return;
     }
 
-    // 🔁 Regular user move
+    //Regular user move
     std::string input;
     std::getline(std::cin, input);
 
@@ -313,9 +313,5 @@ void ChessGame::checkGameEnd() {
         gameOver = true;
         gameResult = "Draw by stalemate!";
     }
-
-    // You could add more draw conditions here:
-    // - 50-move rule
-    // - Threefold repetition
-    // - Insufficient material
+    // more things can be implemented here
 }
