@@ -21,7 +21,7 @@ struct Position {
     
     Position(int r = 0, int c = 0) : row(r), col(c) {}
 
-    bool isValid() const {
+    [[nodiscard]] bool isValid() const {
         return row >= 0 && row < 8 && col >= 0 && col < 8;
     }
 
@@ -124,25 +124,25 @@ public:
     void setupInitialPosition();
     void displayBoard() const;
 
-    Piece* getPiece(const Position& pos) const;
-    bool isEmpty(const Position& pos) const;
+    [[nodiscard]] Piece* getPiece(const Position& pos) const;
+    [[nodiscard]] bool isEmpty(const Position& pos) const;
     bool movePiece(const Move& move);
 
-    bool isSquareAttacked(const Position& pos, Color attackingColor,bool castling_check) const;
-    bool isInCheck(Color kingColor) const;
-    bool wouldBeInCheck(const Move& move, Color kingColor) const;
+    [[nodiscard]] bool isSquareAttacked(const Position& pos, Color attackingColor, bool castling_check = false) const;
+    [[nodiscard]] bool isInCheck(Color kingColor) const;
+    [[nodiscard]] bool wouldBeInCheck(const Move& move, Color kingColor) const;
 
-    std::vector<Move> getAllLegalMoves(Color color) const;
-    bool isCheckmate(Color color) const;
-    bool isStalemate(Color color) const;
+    [[nodiscard]] std::vector<Move> getAllLegalMoves(Color color) const;
+    [[nodiscard]] bool isCheckmate(Color color) const;
+    [[nodiscard]] bool isStalemate(Color color) const;
 
-    Position getKingPosition(Color color) const;
-    bool canCastle(Color color, bool kingSide) const;
+    [[nodiscard]] Position getKingPosition(Color color) const;
+    [[nodiscard]] bool canCastle(Color color, bool kingSide) const;
 
-    std::string getFEN(Color currentPlayer) const;
+    [[nodiscard]] std::string getFEN(Color currentPlayer) const;
     void setEnPassant(const Position& pos) { enPassantTarget = pos; enPassantAvailable = true; }
     void clearEnPassant() { enPassantAvailable = false; }
-    bool isEnPassantTarget(const Position& pos) const { return enPassantAvailable && enPassantTarget == pos; }
+    [[nodiscard]] bool isEnPassantTarget(const Position& pos) const { return enPassantAvailable && enPassantTarget == pos; }
 };
 
 class ChessGame {
@@ -155,23 +155,30 @@ private:
     bool isCPUEnabled;
     Color cpuColor;
     Color humanColor;
-
+    int stockfishSkillLevel;   // 0 (weakest) - 20 (strongest)
+    int stockfishSearchDepth;  // search depth used for "go depth N"
 
 public:
-     ChessGame(bool enableCPU, Color cpuPlaysAs = Color::BLACK);
+     ChessGame(bool enableCPU, Color cpuPlaysAs = Color::BLACK,
+               int skillLevel = 20, int searchDepth = 15);
+
+    void setStockfishDifficulty(int skillLevel, int searchDepth);
 
     void startGame();
     void playTurn();
     bool makeMove(const std::string& algebraicMove);
     void switchPlayer() { currentPlayer = (currentPlayer == Color::WHITE) ? Color::BLACK : Color::WHITE; }
-    Color getCurrentPlayer() const { return currentPlayer; }
-    bool isGameOver() const { return gameOver; }
-    std::string getGameResult() const { return gameResult; }
+    [[nodiscard]] Color getCurrentPlayer() const { return currentPlayer; }
+    [[nodiscard]] bool isGameOver() const { return gameOver; }
+    [[nodiscard]] std::string getGameResult() const { return gameResult; }
     private:
-    Move parseAlgebraicNotation(const std::string& notation) const;
+    [[nodiscard]] Move parseAlgebraicNotation(const std::string& notation) const;
     void checkGameEnd();
     
 };
 
-std::string getBestMoveFromStockfish(const std::string& fen, const std::string& stockfishPath = "stockfish.exe");
+std::string getBestMoveFromStockfish(const std::string& fen,
+                                      const std::string& stockfishPath = "stockfish.exe",
+                                      int skillLevel = 20,
+                                      int searchDepth = 15);
 #endif // CHESS_H

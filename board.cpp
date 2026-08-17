@@ -195,7 +195,7 @@ bool ChessBoard::movePiece(const Move& move) {
     return true;
 }
 
-bool ChessBoard::isSquareAttacked(const Position& pos, Color attackingColor, bool castling_check = false) const {
+bool ChessBoard::isSquareAttacked(const Position& pos, Color attackingColor, bool castling_check) const {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
             Piece* piece = board[row][col].get();
@@ -211,23 +211,22 @@ bool ChessBoard::isSquareAttacked(const Position& pos, Color attackingColor, boo
                     if (leftAttack == pos || rightAttack == pos) {
                         return true;
                     }
-                } else if (castling_check && piece->type == PieceType::KING) {
-                    // For king, check if the square is attacked by any piece
-                    // King can only move one square, so we check all adjacent squares
+                } else if (piece->type == PieceType::KING) {
+                    // King attacks are always just the 8 adjacent squares.
+                    // We must NOT call King::getPossibleMoves here, since that
+                    // calls canCastle -> isInCheck -> isSquareAttacked, which
+                    // would recurse back into this function infinitely.
                     int directions[8][2] = {
                         {0, 1}, {0, -1}, {1, 0}, {-1, 0},
                         {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
                     };
 
-                    for (const auto& dir : directions) {
-                        Position adjacentPos(piecePos.row + dir[0], piecePos.col + dir[1]);
+                    for (const auto& [dr, dc] : directions) {
+                        Position adjacentPos(piecePos.row + dr, piecePos.col + dc);
                         if (adjacentPos == pos) {
                             return true;
                         }
                     }
-                } else if (piece->type == PieceType::KING && !castling_check)
-                {
-                    /* code */
                 } else {
                     // For other pieces, get their possible moves
                     // We need to be careful not to cause infinite recursion

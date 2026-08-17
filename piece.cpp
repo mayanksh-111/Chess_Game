@@ -105,8 +105,8 @@ std::vector<Move> Rook::getPossibleMoves(const Position& pos, ChessBoard& board)
     // Horizontal and vertical directions
     int directions[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
-    for (auto& dir : directions) {
-        auto dirMoves = addDirectionalMoves(pos, board, dir[0], dir[1]);
+    for (const auto& [dr, dc] : directions) {
+        auto dirMoves = addDirectionalMoves(pos, board, dr, dc);
         moves.insert(moves.end(), dirMoves.begin(), dirMoves.end());
     }
     // std::cout << "Reached Rook End\n";
@@ -124,8 +124,8 @@ std::vector<Move> Knight::getPossibleMoves(const Position& pos, ChessBoard& boar
         {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
     };
 
-    for (auto& move : knightMoves) {
-        Position newPos(pos.row + move[0], pos.col + move[1]);
+    for (const auto& [dr, dc] : knightMoves) {
+        Position newPos(pos.row + dr, pos.col + dc);
 
         if (newPos.isValid()) {
             Piece* targetPiece = board.getPiece(newPos);
@@ -145,8 +145,8 @@ std::vector<Move> Bishop::getPossibleMoves(const Position& pos, ChessBoard& boar
     // Diagonal directions
     int directions[4][2] = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
-    for (auto& dir : directions) {
-        auto dirMoves = addDirectionalMoves(pos, board, dir[0], dir[1]);
+    for (const auto& [dr, dc] : directions) {
+        auto dirMoves = addDirectionalMoves(pos, board, dr, dc);
         moves.insert(moves.end(), dirMoves.begin(), dirMoves.end());
     }
     // std::cout << "Reached Bishop End\n";
@@ -163,8 +163,8 @@ std::vector<Move> Queen::getPossibleMoves(const Position& pos, ChessBoard& board
         {1, 1}, {1, -1}, {-1, 1}, {-1, -1}   // Bishop moves
     };
 
-    for (auto& dir : directions) {
-        auto dirMoves = addDirectionalMoves(pos, board, dir[0], dir[1]);
+    for (const auto& [dr, dc] : directions) {
+        auto dirMoves = addDirectionalMoves(pos, board, dr, dc);
         moves.insert(moves.end(), dirMoves.begin(), dirMoves.end());
     }
     // std::cout << "Reached Queen End\n";
@@ -181,8 +181,8 @@ std::vector<Move> King::getPossibleMoves(const Position& pos, ChessBoard& board)
         {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
     };
 
-    for (auto& dir : directions) {
-        Position newPos(pos.row + dir[0], pos.col + dir[1]);
+    for (const auto& [dr, dc] : directions) {
+        Position newPos(pos.row + dr, pos.col + dc);
 
         if (newPos.isValid()) {
             Piece* targetPiece = board.getPiece(newPos);
@@ -199,7 +199,6 @@ std::vector<Move> King::getPossibleMoves(const Position& pos, ChessBoard& board)
             Position kingSidePos(pos.row, pos.col + 2);
             moves.emplace_back(pos, kingSidePos);
         }
-        std::cout << "King Here\n";
 
         // Queen-side castling
         if (board.canCastle(color, false)) {

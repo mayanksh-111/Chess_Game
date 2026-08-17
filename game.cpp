@@ -12,12 +12,24 @@
     #define pclose _pclose
 #endif
 
-ChessGame::ChessGame(bool enableCPU, Color cpuPlaysAs)
+ChessGame::ChessGame(bool enableCPU, Color cpuPlaysAs, int skillLevel, int searchDepth)
     : currentPlayer(Color::WHITE),
     gameOver(false),
     isCPUEnabled(enableCPU),
     cpuColor(cpuPlaysAs),
-    humanColor(cpuPlaysAs == Color::WHITE ? Color::BLACK : Color::WHITE) {}
+    humanColor(cpuPlaysAs == Color::WHITE ? Color::BLACK : Color::WHITE),
+    stockfishSkillLevel(skillLevel),
+    stockfishSearchDepth(searchDepth) {}
+
+void ChessGame::setStockfishDifficulty(int skillLevel, int searchDepth) {
+    // Clamp to valid Stockfish "Skill Level" UCI option range
+    if (skillLevel < 0) skillLevel = 0;
+    if (skillLevel > 20) skillLevel = 20;
+    if (searchDepth < 1) searchDepth = 1;
+
+    stockfishSkillLevel = skillLevel;
+    stockfishSearchDepth = searchDepth;
+}
 
 
 void ChessGame::startGame() {
@@ -43,7 +55,8 @@ void ChessGame::playTurn() {
     if (isCPUEnabled && currentPlayer == cpuColor) {
         std::cout << "CPU is thinking using Stockfish...\n";
         std::string fen = board.getFEN(currentPlayer);
-        std::string bestMoveStr = getBestMoveFromStockfish(fen);
+        std::string bestMoveStr = getBestMoveFromStockfish(
+            fen, "stockfish.exe", stockfishSkillLevel, stockfishSearchDepth);
 
         if (bestMoveStr.length() < 4 || bestMoveStr.length() > 5){
             std::cout << "Invalid move from Stockfish: " << bestMoveStr << "\n";
@@ -91,7 +104,8 @@ void ChessGame::playTurn() {
         std::cout << "Invalid move. Please try again.\n";
     }
 }
-std::string getBestMoveFromStockfish(const std::string& fen, const std::string& stockfishPath) {
+std::string getBestMoveFromStockfish(const std::string& fen, const std::string& stockfishPath,
+                                      int skillLevel, int searchDepth) {
     HANDLE hChildStd_IN_Rd = NULL;
     HANDLE hChildStd_IN_Wr = NULL;
     HANDLE hChildStd_OUT_Rd = NULL;
@@ -146,13 +160,14 @@ std::string getBestMoveFromStockfish(const std::string& fen, const std::string& 
         return "";
     }
 
-    // Send UCI commands to Stockfish
+    // Send UCI commands to Stockfish, including the requested difficulty
     std::string commands =
         "uci\n"
         "isready\n"
+        "setoption name Skill Level value " + std::to_string(skillLevel) + "\n"
         "ucinewgame\n"
         "position fen " + fen + "\n"
-        "go depth 20\n";
+        "go depth " + std::to_string(searchDepth) + "\n";
 
     DWORD written;
     WriteFile(hChildStd_IN_Wr, commands.c_str(), commands.length(), &written, NULL);

@@ -1,0 +1,24 @@
+# Compiled binaries
+*.exe
+chess
+chess_test
+chess_dbg
+chess_san
+
+# Object files
+*.o
+*.obj
+
+# Debug symbols
+*.pdb
+*.dSYM/
+
+# Build directories
+build/
+out/
+
+# Editor/OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
